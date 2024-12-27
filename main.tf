@@ -131,8 +131,8 @@ resource "aws_instance" "test_ec2" {
   subnet_id     = aws_subnet.test_subnet.id
   key_name      = aws_key_pair.test_key_pair.key_name
 
-  # Attach the security group to the instance
-  security_groups = [aws_security_group.test_ec2_sg.name]
+  # Attach the vpc security group to the instance
+  vpc_security_group_ids = [aws_security_group.test_ec2_sg.id]
 
   tags = {
     Name = "test-ec2-instance"
@@ -154,7 +154,7 @@ resource "aws_db_instance" "test_rds" {
   allocated_storage       = 20
   max_allocated_storage   = 100
   engine                  = "postgres"
-  engine_version          = "14.5"
+  engine_version          = "15.4"
   instance_class          = "db.t3.micro"
   username                = "admin"
 
