@@ -156,7 +156,7 @@ resource "aws_db_instance" "test_rds" {
   engine                  = "postgres"
   engine_version          = "15.4"
   instance_class          = "db.t3.micro"
-  username                = "admin"
+  username                = "dbadmin"
 
   # Use the password hash from variables.tf
   password = var.db_password_hash
