@@ -9,21 +9,32 @@ resource "aws_vpc" "test_vpc" {
   }
 }
 
-# Create a public subnet
+# Create public subnets in two availability zones
 resource "aws_subnet" "test_subnet" {
-  vpc_id                  = aws_vpc.test_vpc.id # Associate with the VPC
-  cidr_block              = "10.0.1.0/24"       # Subnet CIDR block
-  map_public_ip_on_launch = true                # Automatically assign public IP
-  availability_zone       = "eu-central-1a"     # Set availability zone
+  vpc_id                  = aws_vpc.test_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "eu-central-1a"
 
   tags = {
     Name = "test-subnet"
   }
 }
 
+resource "aws_subnet" "test_subnet_2" {
+  vpc_id                  = aws_vpc.test_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "eu-central-1b"
+
+  tags = {
+    Name = "test-subnet-2"
+  }
+}
+
 # Create an Internet Gateway
 resource "aws_internet_gateway" "test_igw" {
-  vpc_id = aws_vpc.test_vpc.id # Attach to the VPC
+  vpc_id = aws_vpc.test_vpc.id
 
   tags = {
     Name = "test-igw"
@@ -32,9 +43,8 @@ resource "aws_internet_gateway" "test_igw" {
 
 # Create a route table
 resource "aws_route_table" "test_route_table" {
-  vpc_id = aws_vpc.test_vpc.id # Associate with the VPC
+  vpc_id = aws_vpc.test_vpc.id
 
-  # Add a route for all traffic to the Internet Gateway
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.test_igw.id
@@ -45,19 +55,17 @@ resource "aws_route_table" "test_route_table" {
   }
 }
 
-# Associate the route table with the public subnet
 resource "aws_route_table_association" "test_route_table_assoc" {
-  subnet_id      = aws_subnet.test_subnet.id      # Associate with the subnet
+  subnet_id      = aws_subnet.test_subnet.id
   route_table_id = aws_route_table.test_route_table.id
 }
 
-# Create a security group for EC2 instance
+# Security groups for EC2 and RDS
 resource "aws_security_group" "test_ec2_sg" {
   name        = "test-ec2-security-group"
   description = "Allow SSH and HTTP access"
-  vpc_id      = aws_vpc.test_vpc.id # Associate with the VPC
+  vpc_id      = aws_vpc.test_vpc.id
 
-  # Allow SSH access only from the specified public IP
   ingress {
     description = "Allow SSH"
     from_port   = 22
@@ -66,7 +74,6 @@ resource "aws_security_group" "test_ec2_sg" {
     cidr_blocks = [var.allowed_ip]
   }
 
-  # Allow HTTP access from anywhere
   ingress {
     description = "Allow HTTP"
     from_port   = 80
@@ -75,7 +82,6 @@ resource "aws_security_group" "test_ec2_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow all outbound traffic
   egress {
     description = "Allow all outbound traffic"
     from_port   = 0
@@ -89,22 +95,19 @@ resource "aws_security_group" "test_ec2_sg" {
   }
 }
 
-# Create a security group for RDS instance
 resource "aws_security_group" "test_rds_sg" {
   name        = "test-rds-security-group"
   description = "Allow EC2 instance to connect to RDS"
   vpc_id      = aws_vpc.test_vpc.id
 
-  # Allow PostgreSQL access from the EC2 security group
   ingress {
     description     = "Allow PostgreSQL"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.test_ec2_sg.id] # Allow traffic from EC2 security group
+    security_groups = [aws_security_group.test_ec2_sg.id]
   }
 
-  # Allow all outbound traffic
   egress {
     description = "Allow all outbound traffic"
     from_port   = 0
@@ -118,27 +121,24 @@ resource "aws_security_group" "test_rds_sg" {
   }
 }
 
-# Create a key pair for SSH access
-resource "aws_key_pair" "test_key_pair" {
-  key_name   = "test-existing-key"
-  public_key = file("~/.ssh/id_rsa.pub")
-}
-
-# Launch an EC2 instance
-resource "aws_instance" "test_ec2" {
-  ami           = "ami-0a49b025fffbbdac6" # Amazon Linux 2 AMI for eu-central-1
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.test_subnet.id
-  key_name      = aws_key_pair.test_key_pair.key_name
-
-  # Attach the vpc security group to the instance
-  vpc_security_group_ids = [aws_security_group.test_ec2_sg.id]
+# Create RDS subnet group
+resource "aws_db_subnet_group" "test_rds_subnet_group" {
+  name       = "test-rds-subnet-group"
+  subnet_ids = [aws_subnet.test_subnet.id, aws_subnet.test_subnet_2.id]
 
   tags = {
-    Name = "test-ec2-instance"
+    Name = "test-rds-subnet-group"
   }
+}
 
-  # Install Apache and PostgreSQL client using user_data
+# EC2 instance
+resource "aws_instance" "test_ec2" {
+  ami                    = "ami-0a49b025fffbbdac6"
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.test_subnet.id
+  vpc_security_group_ids = [aws_security_group.test_ec2_sg.id]
+  key_name               = aws_key_pair.test_key_pair.key_name
+
   user_data = <<EOT
             #!/bin/bash
             yum update -y
@@ -147,9 +147,13 @@ resource "aws_instance" "test_ec2" {
             systemctl start httpd
             systemctl enable httpd
   EOT
+
+  tags = {
+    Name = "test-ec2-instance"
+  }
 }
 
-# Deploy a PostgreSQL RDS instance
+# RDS instance
 resource "aws_db_instance" "test_rds" {
   allocated_storage       = 20
   max_allocated_storage   = 100
@@ -157,13 +161,11 @@ resource "aws_db_instance" "test_rds" {
   engine_version          = "15.4"
   instance_class          = "db.t3.micro"
   username                = "dbadmin"
-
-  # Use the password hash from variables.tf
-  password = var.db_password_hash
-
+  password                = var.db_password_hash
   multi_az                = true
   publicly_accessible     = false
   vpc_security_group_ids  = [aws_security_group.test_rds_sg.id]
+  db_subnet_group_name    = aws_db_subnet_group.test_rds_subnet_group.name
   skip_final_snapshot     = true
 
   tags = {
