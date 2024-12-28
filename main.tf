@@ -147,12 +147,12 @@ resource "aws_instance" "test_ec2" {
 
   user_data = <<EOT
             #!/bin/bash
-            yum update -y
-            yum install -y postgresql
-            yum install -y httpd
-            systemctl start httpd
-            systemctl enable httpd
+            sudo apt update -y
+            sudo apt install -y apache2 postgresql-client
+            sudo systemctl start apache2
+            sudo systemctl enable apache2
   EOT
+
 
   tags = {
     Name = "test-ec2-instance"
