@@ -131,9 +131,15 @@ resource "aws_db_subnet_group" "test_rds_subnet_group" {
   }
 }
 
+# Create a key pair for SSH access
+resource "aws_key_pair" "test_key_pair" {
+  key_name   = "test-existing-key"
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
 # EC2 instance
 resource "aws_instance" "test_ec2" {
-  ami                    = "ami-0a49b025fffbbdac6"
+  ami                    = "ami-0a49b025fffbbdac6" # Amazon Linux 2 AMI for eu-central-1
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.test_subnet.id
   vpc_security_group_ids = [aws_security_group.test_ec2_sg.id]
