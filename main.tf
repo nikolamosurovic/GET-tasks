@@ -156,6 +156,8 @@ resource "aws_instance" "test_ec2" {
 
   tags = {
     Name = "test-ec2-instance"
+    Description = "Test instance"
+    CostCenter  = "123456"
   }
 }
 
