@@ -147,10 +147,10 @@ resource "aws_instance" "test_ec2" {
 
   user_data = <<EOT
             #!/bin/bash
-            sudo apt update -y
-            sudo apt install -y apache2 postgresql-client
-            sudo systemctl start apache2
-            sudo systemctl enable apache2
+            yum update -y
+            yum install -y httpd postgresql
+            systemctl start httpd
+            systemctl enable httpd
   EOT
 
 
