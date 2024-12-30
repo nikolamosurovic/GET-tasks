@@ -139,8 +139,8 @@ resource "aws_db_subnet_group" "test_rds_subnet_group" {
 }
 
 # Create a key pair for SSH access
-resource "aws_key_pair" "test_key_pair" {
-  key_name   = "test-existing-key"
+resource "aws_key_pair" "my_pub_key" {
+  key_name   = "my-public-key"
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
@@ -150,7 +150,7 @@ resource "aws_instance" "test_ec2" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.test_subnet.id
   vpc_security_group_ids = [aws_security_group.test_ec2_sg.id]
-  key_name               = aws_key_pair.test_key_pair.key_name
+  key_name               = aws_key_pair.my_pub_key.key_name
 
   user_data = <<EOT
             #!/bin/bash
