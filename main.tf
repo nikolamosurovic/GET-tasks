@@ -155,7 +155,6 @@ resource "aws_instance" "test_ec2" {
   user_data = <<EOT
             #!/bin/bash
             sudo yum update -y
-            sudo amazon-linux-extras enable postgresql15 # enable repo for PostgreSQL 15
             sudo yum install -y httpd postgresql
             sudo systemctl start httpd
             sudo systemctl enable httpd
@@ -173,7 +172,7 @@ resource "aws_db_instance" "test_rds" {
   allocated_storage       = 20
   max_allocated_storage   = 100
   engine                  = "postgres"
-  engine_version          = "15.4"
+  engine_version          = "16.1"
   instance_class          = "db.t3.micro"
   username                = "dbadmin"
   password                = var.db_password_hash
