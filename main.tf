@@ -55,8 +55,15 @@ resource "aws_route_table" "test_route_table" {
   }
 }
 
+# Route Table Association for the first subnet
 resource "aws_route_table_association" "test_route_table_assoc" {
   subnet_id      = aws_subnet.test_subnet.id
+  route_table_id = aws_route_table.test_route_table.id
+}
+
+# Route Table Association for the second subnet
+resource "aws_route_table_association" "test_route_table_assoc_2" {
+  subnet_id      = aws_subnet.test_subnet_2.id
   route_table_id = aws_route_table.test_route_table.id
 }
 
@@ -153,9 +160,8 @@ resource "aws_instance" "test_ec2" {
             sudo systemctl enable httpd
   EOT
 
-
   tags = {
-    Name = "test-ec2-instance"
+    Name        = "test-ec2-instance"
     Description = "Test instance"
     CostCenter  = "123456"
   }
