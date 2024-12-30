@@ -1,8 +1,7 @@
 # EventBridge rule for daily schedule
 resource "aws_cloudwatch_event_rule" "daily_schedule_rule" {
   name                = "daily-email-schedule"
-  #schedule_expression = "cron(0 1 * * ? *)" # every day at 1am
-  schedule_expression = "cron(0/10 * * * ? *)"
+  schedule_expression = "cron(0 1 * * ? *)" # every day at 1am
 }
 
 # Target for EventBridge rule
