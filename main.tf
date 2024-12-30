@@ -176,7 +176,7 @@ resource "aws_db_instance" "test_rds" {
   engine_version          = "14.14"
   instance_class          = "db.t3.micro"
   username                = "dbadmin"
-  password                = var.db_password_hash
+  password                = var.db_password
   multi_az                = true
   publicly_accessible     = false
   vpc_security_group_ids  = [aws_security_group.test_rds_sg.id]
