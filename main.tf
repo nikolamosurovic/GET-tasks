@@ -155,6 +155,7 @@ resource "aws_instance" "test_ec2" {
   user_data = <<EOT
             #!/bin/bash
             sudo yum update -y
+            sudo amazon-linux-extras enable postgresql15 # enable repo for PostgreSQL 15
             sudo yum install -y httpd postgresql
             sudo systemctl start httpd
             sudo systemctl enable httpd
