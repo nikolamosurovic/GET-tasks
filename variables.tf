@@ -2,7 +2,7 @@
 variable "allowed_ip" {
   description = "Public IP address allowed for SSH access"
   type        = string
-  default     = "213.196.99.66/32" # Replace with your current public IP
+  default     = "213.196.99.32/32" # Replace with your current public IP
 }
 
 # password for PostgreSQL RDS instance
