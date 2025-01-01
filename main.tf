@@ -128,16 +128,6 @@ resource "aws_security_group" "test_rds_sg" {
   }
 }
 
-# Create RDS subnet group
-resource "aws_db_subnet_group" "test_rds_subnet_group" {
-  name       = "test-rds-subnet-group"
-  subnet_ids = [aws_subnet.test_subnet.id, aws_subnet.test_subnet_2.id]
-
-  tags = {
-    Name = "test-rds-subnet-group"
-  }
-}
-
 # Create a key pair for SSH access
 resource "aws_key_pair" "my_pub_key" {
   key_name   = "my-public-key"
