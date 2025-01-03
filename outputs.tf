@@ -20,3 +20,13 @@ output "lambda_function_name" {
   value       = aws_lambda_function.send_daily_email.function_name
   description = "Name of the Lambda function"
 }
+
+output "rds_primary_endpoint" {
+  value = aws_db_instance.test_rds.endpoint
+  description = "Primary RDS instance endpoint"
+}
+
+output "rds_replica_endpoint" {
+  value = aws_db_instance.test_rds_replica.endpoint
+  description = "Read replica RDS instance endpoint"
+}
