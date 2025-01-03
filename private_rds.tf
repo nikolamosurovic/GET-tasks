@@ -28,8 +28,8 @@ resource "aws_db_parameter_group" "default" {
 # RDS Instance (Primary)
 resource "aws_db_instance" "test_rds" {
   identifier              = "test-rds-primary"
-  allocated_storage       = 50
-  max_allocated_storage   = 100
+  allocated_storage       = 10
+  max_allocated_storage   = 20
   engine                  = "postgres"
   engine_version          = "14.14"
   instance_class          = "db.t3.micro"
