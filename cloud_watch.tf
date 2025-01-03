@@ -1,10 +1,10 @@
-# EventBridge rule for daily schedule
+# CloudWatch rule for daily schedule
 resource "aws_cloudwatch_event_rule" "daily_schedule_rule" {
   name                = "daily-email-schedule"
   schedule_expression = "cron(0 1 * * ? *)" # every day at 1am
 }
 
-# Target for EventBridge rule
+# Target for CloudWatch rule
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule      = aws_cloudwatch_event_rule.daily_schedule_rule.name
   target_id = "lambda"
